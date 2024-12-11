@@ -1,0 +1,106 @@
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}Czat{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-default navbar-flat">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">ChatAnon</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/">Strona główna</a></li>
+            <li class="active"><a href="/chat">Chat</a></li>
+            <li><a href="/form">Książka dla gości</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <h1>Czat</h1>
+    <div class="row">
+        <div class="mb-3">
+            <div id="nickname-container">
+                <label for="field1" class="input-label">Nazwa użytkownika</label>
+                <input type="text" class="form-control" id="input-nickname" placeholder="Podaj imię lub nick">
+                <button type="submit" class="btn btn-secondary" onclick="setNickname()">Wyślij</button>
+            </div>
+        </div>
+        <div style="position: fixed; bottom: 30px; margin-left: 500px; width:800px;">
+            <div class="input-group">
+                <input type="text" class="form-control" id="input-message" placeholder="Wpisz tekst" disabled>
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" type="submit" onclick="sendMessage()" disabled>Go!</button>
+                </span>
+            </div>
+        </div>
+        <br>
+        <div id="messages">
+            {% for message in messages %}
+                <p><strong>{{ message[0] }}:</strong> {{ message[1] }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<br>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
+<script>
+    var socket = io();
+
+    socket.on('connect', function () {
+        console.log('Połączenie WebSocket zostało otwarte.');
+    });
+
+    socket.on('disconnect', function () {
+        console.log('Połączenie WebSocket zostało zamknięte.');
+    });
+
+    socket.on('message', function (data) {
+        var name = data.name;
+        var message = data.message;
+        var messagesDiv = document.getElementById('messages');
+        var newMessage = document.createElement('p');
+        newMessage.innerHTML = '<strong>' + name + ':</strong> ' + message;
+        messagesDiv.appendChild(newMessage);
+        console.log('Otrzymano wiadomość: ' + message);
+    });
+
+    function setNickname() {
+        var nicknameInput = document.getElementById('input-nickname');
+        var nickname = nicknameInput.value.trim();
+        if (nickname !== '') {
+            // Wysłanie nazwy użytkownika do serwera
+            socket.emit('setNickname', nickname);
+
+            // Zaktualizowanie informacji na stronie
+            var nicknameContainer = document.getElementById('nickname-container');
+            nicknameContainer.innerHTML = '<p class="nickname-label">Nazwa użytkownika: <strong>' + nickname + '</strong></p>';
+
+            // Włączenie możliwości wysłania wiadomości
+            var messageInput = document.getElementById('input-message');
+            var sendMessageButton = document.querySelector('#input-message + .input-group-btn button');
+            messageInput.disabled = false;
+            sendMessageButton.disabled = false;
+
+            // Zapisanie nazwy użytkownika w localStorage
+            localStorage.setItem('nickname', nickname);
+        }
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById('input-message');
+        var message = messageInput.value.trim();
+        if (message !== '') {
+            var nickname = localStorage.getItem('nickname') || 'User';
+            socket.emit('message', { name: nickname, message: message }); // Zmiana na przekazanie obiektu z nazwą i wiadomością
+            messageInput.value = '';
+        }
+    }
+</script>
+
+{% endblock %}

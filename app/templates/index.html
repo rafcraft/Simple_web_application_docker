@@ -1,0 +1,35 @@
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}Strona główna{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+{% block content %}
+<nav class="navbar navbar-default" style="background-color: #333;">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">ChatAnon</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Strona główna</a></li>
+            <li><a href="/chat">Chat</a></li>
+            <li><a href="/form">Książka dla gości</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="jumbotron text-center">
+    <h1>Witamy na ChatAnon!</h1>
+    <p>Czatuj anonimowo!</p>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <video width="70%" controls>
+                <source src="{{ url_for('static', filename='videos/your_video.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+</div>
+{% endblock %}

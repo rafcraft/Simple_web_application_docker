@@ -1,0 +1,63 @@
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}Formularz{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-default" style="background-color: #333;">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">ChatAnon</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/">Strona główna</a></li>
+            <li><a href="/chat">Czat</a></li>
+            <li class="active"><a href="/form">Księga gości</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Wyświetlanie komunikatu flash -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="container">
+            <div class="alert alert-success" role="alert">
+                {{ messages[0] }}
+            </div>
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h2 class="text-center">Formularz</h2>
+            <br>
+            <form method="post" action="/form">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ wtf.form_field(form.email, class_="form-control", type="email") }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(form.name, class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(form.last_name, class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(form.message, class_="form-control", rows=5, maxlength=500) }}
+                </div>
+                <br>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Wyślij</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
